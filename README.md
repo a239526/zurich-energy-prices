@@ -109,7 +109,7 @@ The parameters can be adjusted as follows:
 
 ### Tariff availability
 
-The different tariff structures have different data availability periods:
+The different tariff structures have different data availability periods (Europe/Zurich timezone):
 
 | Tariff | Available period |
 |---|---|
