@@ -114,8 +114,8 @@ The different tariff structures have different data availability periods:
 | Tariff | Available period |
 |---|---|
 | Standard | January 1, 2023 – December 31, 2024 |
-| Dynamic | From October 2023 onward |
-| Time-of-use (TOU) | From October 2023 onward |
+| Dynamic | October 1 2023 – December 31, 2024 |
+| Time-of-use (TOU) | October 1 2023 – December 31, 2024 |
 
 The dynamic and time-of-use tariffs are only available starting in October 2023. The generation scripts automatically filter out timestamps for which the corresponding tariff data is unavailable.
 
