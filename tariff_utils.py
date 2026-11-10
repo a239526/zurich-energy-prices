@@ -3,7 +3,7 @@ import pandas as pd
 
 DATA_FILE = "tariff_data.csv"
 CHF_TO_USD = 1.21 
-OUTPUT_DIR = "prices"
+OUTPUT_DIR = "outputs/prices"
 
 def load_tariff_data():
     # loads the tariff data from the CSV file
@@ -72,10 +72,10 @@ def sell_price(df_new, export_price_ratio=0.2):
 
     return df_new
 
-def generate_price_file(tariff_type="standard", convert_to_zurich=True, convert_to_usd=True, export_price_ratio=0.2):
+def generate_price_file(tariff_type="standard", convert_to_zurich=True, convert_to_usd=True, export_price_ratio=0.2, output_dir=OUTPUT_DIR):
 
     # creates the output directory if it does not exist
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
 
     # loads the original tariff data
     df = load_tariff_data()
