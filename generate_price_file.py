@@ -4,7 +4,7 @@ from plot_utils import plot_daily_prices
 # General configuration
 OUTPUT_DIR = "outputs/prices"
 CONVERT_TO_ZURICH = False
-CONVERT_TO_USD = True
+CONVERT_TO_USD = False
 EXPORT_PRICE_RATIO = 0.2
 
 TARIFF_TYPES = ["standard", "dynamic", "time_of_use"]
