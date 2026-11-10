@@ -4,7 +4,7 @@
 
 This repository provides Python scripts to generate electricity price CSV files and daily price plots for Switzerland using the dataset published by Kaiser et al. (2026).
 
-The dataset contains electricity tariff data at **15-minute intervals**, allowing the generation of time-series electricity prices for different tariff structures.
+The dataset contains electricity tariff data at **15-minute intervals**, allowing the generation of time-series electricity prices for different tariff structures. It covers the period from **January 1, 2023, to December 31, 2024**, providing two years of electricity tariff data.
 
 The generated CSV files contain the following columns:
 
@@ -133,9 +133,17 @@ GENERATE_PLOTS = False
 
 The repository supports three electricity tariff structures:
 
-- **Standard:** Uses the standard electricity tariff, combining energy and grid charges. The dataset provides complete data for the entire period.
-- **Dynamic:** Uses time-varying electricity prices, combining energy and grid charges. Data are available starting in October 2023. Timestamps without available tariff data are excluded from the generated time series.
-- **Time-of-use (TOU):** Uses electricity prices that vary according to the time of day, combining energy and grid charges. Although the original dataset only provides TOU values starting in October 2023, the missing values are reconstructed using the hourly tariff profiles. Separate profiles are used for daylight saving time and standard time, allowing the tariff data to be extended to the entire period while preserving the corresponding local hourly prices.
+#### Standard Tariff
+
+Uses the standard electricity tariff, combining energy and grid charges. The dataset provides complete data for the entire period covered by the repository (January 1, 2023, to December 31, 2024).
+
+#### Dynamic Tariff
+
+Uses time-varying electricity prices, combining energy and grid charges. Data are available starting in October 2023. Timestamps without available tariff data are excluded from the generated time series.
+
+#### Time-of-use (TOU) Tariff
+
+Uses electricity prices that vary according to the time of day, combining energy and grid charges. Although the original dataset only provides TOU values starting in October 2023, the missing values are reconstructed using the hourly tariff profiles. Separate profiles are used for daylight saving time and standard time, allowing the tariff data to be extended to the entire period (January 1, 2023, to December 31, 2024) while preserving the corresponding local hourly prices.
 
 ## Output
 
@@ -204,7 +212,7 @@ zurich-energy-prices/
 - Currency conversion from CHF to USD depends on the exchange rate configured in `tariff_utils.py`.
 - Timestamps are originally provided in UTC. Timezone conversion to `Europe/Zurich` is optional.
 - The export price is calculated as a fixed proportion of the purchase price, according to `EXPORT_PRICE_RATIO`.
-- Missing tariff values are excluded from the corresponding generated time series.
+- Missing tariff values are handled according to the tariff structure: TOU values are reconstructed using the corresponding hourly tariff profiles, while unavailable dynamic tariff values are excluded from the generated time series.
 - Plot generation is optional and does not affect CSV generation.
 
 ## Citation
