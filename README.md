@@ -129,17 +129,13 @@ To skip plot generation while still generating all CSV files:
 GENERATE_PLOTS = False
 ```
 
-### Tariff availability
+### Tariff Types
 
-The different tariff structures have different data availability periods (Europe/Zurich timezone):
+The repository supports three electricity tariff structures:
 
-| Tariff | Available period |
-|---|---|
-| Standard | January 1, 2023 – December 31, 2024 |
-| Dynamic | October 1, 2023 – December 31, 2024 |
-| Time-of-use (TOU) | October 1, 2023 – December 31, 2024 |
-
-The dynamic and time-of-use tariffs are only available starting in October 2023. The generation scripts automatically filter out timestamps for which the corresponding tariff data is unavailable.
+- **Standard:** Uses the standard electricity tariff, combining energy and grid charges. The dataset provides complete data for the entire period.
+- **Dynamic:** Uses time-varying electricity prices, combining energy and grid charges. Data are available starting in October 2023. Timestamps without available tariff data are excluded from the generated time series.
+- **Time-of-use (TOU):** Uses electricity prices that vary according to the time of day, combining energy and grid charges. Although the original dataset only provides TOU values starting in October 2023, the missing values are reconstructed using the hourly tariff profiles. Separate profiles are used for daylight saving time and standard time, allowing the tariff data to be extended to the entire period while preserving the corresponding local hourly prices.
 
 ## Output
 
