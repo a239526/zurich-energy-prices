@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository provides Python scripts to generate electricity price CSV files for Switzerland using the dataset published by Kaiser et al. (2026).
+This repository provides Python scripts to generate electricity price CSV files and daily price plots for Switzerland using the dataset published by Kaiser et al. (2026).
 
 The dataset contains electricity tariff data at **15-minute intervals**, allowing the generation of time-series electricity prices for different tariff structures.
 
@@ -19,11 +19,13 @@ The repository currently supports three tariff types:
 - **Dynamic:** Dynamic electricity tariff.
 - **Time-of-use (TOU):** Time-dependent electricity tariff.
 
+Additionally, the scripts can generate daily plots comparing electricity purchase and export prices for selected dates.
+
 ## Data Source
 
 The electricity tariff data used in this repository comes from:
 
-Kaiser, K., Kreft, M., González Vayá, M., & Hug, G. (2026). *Dataset on residential electricity load profiles in Switzerland* (Version v1) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.21398769
+Kaiser, K., Kreft, M., González Vayá, M., & Hug, H. (2026). *Dataset on residential electricity load profiles in Switzerland* (Version v1) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.21398769
 
 All original tariff values are provided in Rp./kWh (Swiss Rappen per kilowatt-hour). The scripts convert these values to CHF/kWh and optionally to USD/kWh.
 
@@ -32,7 +34,7 @@ All original tariff values are provided in Rp./kWh (Swiss Rappen per kilowatt-ho
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/a239526/zurich-energy-prices/
 cd zurich-energy-prices
 ```
 
@@ -62,7 +64,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Generate the price CSV files
+### 4. Generate price CSV files and plots
 
 Run the main script:
 
@@ -70,31 +72,21 @@ Run the main script:
 python generate_price_file.py
 ```
 
-The generated CSV files will be saved in the `prices/` directory.
+The generated CSV files will be saved in the `outputs/prices/` directory. If plot generation is enabled, the daily plots will be saved in the `outputs/plots/` directory.
 
 ## Configuration
 
 The generation process can be configured directly in `generate_price_file.py`.
 
-The following parameters are available:
+### General configuration
 
 ```python
-from tariff_utils import generate_price_file
-
 OUTPUT_DIR = "prices"
 CONVERT_TO_ZURICH = False
 CONVERT_TO_USD = True
 EXPORT_PRICE_RATIO = 0.2
-TARIFF_TYPES = ["standard", "dynamic", "time_of_use"]
 
-for tariff_type in TARIFF_TYPES:
-    generate_price_file(
-        tariff_type=tariff_type,
-        convert_to_zurich=CONVERT_TO_ZURICH,
-        convert_to_usd=CONVERT_TO_USD,
-        export_price_ratio=EXPORT_PRICE_RATIO,
-        output_dir=OUTPUT_DIR
-    )
+TARIFF_TYPES = ["standard", "dynamic", "time_of_use"]
 ```
 
 The parameters can be adjusted as follows:
@@ -107,6 +99,36 @@ The parameters can be adjusted as follows:
 | `EXPORT_PRICE_RATIO` | Defines the ratio between the electricity export price and the purchase price. For example, `0.2` means that the export price is 20% of the purchase price. |
 | `TARIFF_TYPES` | List of tariff types to generate. Supported values are `standard`, `dynamic`, and `time_of_use`. |
 
+### Plot configuration
+
+Plot generation is optional and can be enabled or disabled independently of CSV generation.
+
+```python
+GENERATE_PLOTS = True
+PLOT_DIR = "plots"
+PLOT_DATES = ["2023-10-15"]
+```
+
+| Parameter | Description |
+|---|---|
+| `GENERATE_PLOTS` | If `True`, generates daily price plots. If `False`, only the CSV files are generated. |
+| `PLOT_DIR` | Directory where the generated plots are saved. |
+| `PLOT_DATES` | List of dates for which daily plots should be generated, using the `YYYY-MM-DD` format. |
+
+For each selected date, the script generates a plot for every tariff type in `TARIFF_TYPES`. Each plot displays the electricity purchase and export prices over the selected day.
+
+For example, to generate plots for October 15 and October 16, 2023:
+
+```python
+PLOT_DATES = ["2023-10-15", "2023-10-16"]
+```
+
+To skip plot generation while still generating all CSV files:
+
+```python
+GENERATE_PLOTS = False
+```
+
 ### Tariff availability
 
 The different tariff structures have different data availability periods (Europe/Zurich timezone):
@@ -114,12 +136,14 @@ The different tariff structures have different data availability periods (Europe
 | Tariff | Available period |
 |---|---|
 | Standard | January 1, 2023 – December 31, 2024 |
-| Dynamic | October 1 2023 – December 31, 2024 |
-| Time-of-use (TOU) | October 1 2023 – December 31, 2024 |
+| Dynamic | October 1, 2023 – December 31, 2024 |
+| Time-of-use (TOU) | October 1, 2023 – December 31, 2024 |
 
 The dynamic and time-of-use tariffs are only available starting in October 2023. The generation scripts automatically filter out timestamps for which the corresponding tariff data is unavailable.
 
 ## Output
+
+### CSV files
 
 The generated files are saved in the directory specified by `OUTPUT_DIR` (default: `prices/`).
 
@@ -144,18 +168,34 @@ timestamp,price_per_kwh,sell_price_per_kwh
 
 All numerical values are saved with six decimal places.
 
-The output directory is created automatically if it does not already exist.
+### Daily plots
+
+When `GENERATE_PLOTS = True`, the script saves one PNG plot for each combination of tariff type and selected date.
+
+For example, with the default configuration:
+
+```text
+plots/
+├── standard_prices_2023-10-15.png
+├── dynamic_prices_2023-10-15.png
+└── time_of_use_prices_2023-10-15.png
+```
+
+Each plot shows the purchase and export prices throughout the selected day. The vertical axis indicates the price in USD/kWh or CHF/kWh, depending on the `CONVERT_TO_USD` setting.
+
+Both output directories are created automatically if they do not already exist.
 
 ## Repository Structure
 
 ```text
 zurich-energy-prices/
 │
-├── prices/                  # Generated electricity price CSV files
+├── outputs/                # Generated CSV files and daily price plots
 │
 ├── tariff_data.csv          # Original tariff dataset
 ├── tariff_utils.py          # Functions for loading and processing tariff data
-├── generate_price_file.py   # Main script for generating price CSV files
+├── plot_utils.py            # Functions for generating daily price plots
+├── generate_price_file.py   # Main script for generating CSV files and plots
 │
 ├── requirements.txt         # Python dependencies
 ├── .gitignore
@@ -169,9 +209,10 @@ zurich-energy-prices/
 - Timestamps are originally provided in UTC. Timezone conversion to `Europe/Zurich` is optional.
 - The export price is calculated as a fixed proportion of the purchase price, according to `EXPORT_PRICE_RATIO`.
 - Missing tariff values are excluded from the corresponding generated time series.
+- Plot generation is optional and does not affect CSV generation.
 
 ## Citation
 
 If you use the dataset or the generated price series in your research, please cite the original dataset:
 
-Kaiser, K., Kreft, M., González Vayá, M., & Hug, G. (2026). *Dataset on residential electricity load profiles in Switzerland* (Version v1) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.21398769
+Kaiser, K., Kreft, M., González Vayá, M., & Hug, H. (2026). *Dataset on residential electricity load profiles in Switzerland* (Version v1) [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.21398769
