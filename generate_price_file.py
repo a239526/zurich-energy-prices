@@ -1,6 +1,6 @@
 from tariff_utils import generate_price_file
 
-CONVERT_TO_ZURICH = True
+CONVERT_TO_ZURICH = False
 CONVERT_TO_USD = True
 EXPORT_PRICE_RATIO = 0.2
 TARIFF_TYPES = ["standard", "dynamic", "time_of_use"]
