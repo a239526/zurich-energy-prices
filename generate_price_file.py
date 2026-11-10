@@ -1,5 +1,6 @@
 from tariff_utils import generate_price_file
 
+OUTPUT_DIR = "prices"
 CONVERT_TO_ZURICH = False
 CONVERT_TO_USD = True
 EXPORT_PRICE_RATIO = 0.2
@@ -10,4 +11,6 @@ for tariff_type in TARIFF_TYPES:
         tariff_type=tariff_type,
         convert_to_zurich=CONVERT_TO_ZURICH,
         convert_to_usd=CONVERT_TO_USD,
-        export_price_ratio=EXPORT_PRICE_RATIO)
+        export_price_ratio=EXPORT_PRICE_RATIO,
+        output_dir=OUTPUT_DIR
+    )
