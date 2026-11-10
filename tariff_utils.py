@@ -51,14 +51,23 @@ def dynamic_tariff(df, df_new, convert_to_usd=True):
     return df_new
 
 def time_of_use_tariff(df, df_new, convert_to_usd=True):
-    # filters timestamps where time-of-use tariff data is available
-    mask = df['energy_unit_cn'].notna() & df['grid_tou'].notna()
+    # converts timestamps to Zurich timezone
+    timestamp = pd.to_datetime(df['timestamp_utc'], utc=True).dt.tz_convert('Europe/Zurich')
 
-    df = df.loc[mask].copy()
-    df_new = df_new.loc[mask].copy()
+    # extracts local hour and daylight saving time status
+    hour = timestamp.dt.hour
+    dst = timestamp.map(lambda t: t.dst() != pd.Timedelta(0))
+
+    # fills missing TOU data using the corresponding seasonal hourly profile
+    energy = df['energy_unit_cn'].fillna(
+        df['energy_unit_cn'].groupby([dst, hour]).transform('first')
+    )
+    grid = df['grid_tou'].fillna(
+        df['grid_tou'].groupby([dst, hour]).transform('first')
+    )
 
     # calculates the time-of-use tariff (energy + grid) in CHF/kWh
-    df_new['price_per_kwh'] = (df['energy_unit_cn'] + df['grid_tou']) / 100
+    df_new['price_per_kwh'] = (energy + grid) / 100
 
     # converts from CHF to USD if requested
     if convert_to_usd:
