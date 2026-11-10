@@ -2,4 +2,4 @@
 .venv/
 myenv/
 __pycache__/
-prices/
+outputs/
