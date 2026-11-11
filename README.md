@@ -143,7 +143,15 @@ Uses time-varying electricity prices, combining energy and grid charges. Data ar
 
 #### Time-of-use (TOU) Tariff
 
-Uses electricity prices that vary according to the time of day, combining energy and grid charges. Although the original dataset only provides TOU values starting in October 2023, the missing values are reconstructed using the hourly tariff profiles. Separate profiles are used for daylight saving time and standard time, allowing the tariff data to be extended to the entire period (January 1, 2023, to December 31, 2024) while preserving the corresponding local hourly prices.
+Uses electricity prices that vary according to the time of day, combining energy and grid charges. Although the original dataset only provides TOU values starting in October 2023, the missing values are reconstructed based on the recurring daily tariff profiles.
+
+For 2023, the TOU tariff follows the same 15-minute price profile every day, with two distinct profiles depending on whether daylight saving time (DST) is in effect. The reconstruction is performed as follows:
+- Timestamps are converted to the `Europe/Zurich` timezone to correctly identify daylight saving time and standard time.
+- Two separate tariff profiles are considered: one for daylight saving time (CEST) and another for standard time (CET).
+- Within each profile, tariff values are grouped by their local 15-minute interval.
+- Missing energy and grid tariff values (`NaN`) are replaced with the first available value for the corresponding 15-minute interval and seasonal profile, while existing values are preserved.
+
+This approach allows the TOU tariff data to be extended to the entire period (January 1, 2023, to December 31, 2024).
 
 ## Output
 
