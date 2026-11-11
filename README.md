@@ -137,9 +137,20 @@ The repository supports three electricity tariff structures:
 
 Uses the standard electricity tariff, combining energy and grid charges. The dataset provides complete data for the entire period covered by the repository (January 1, 2023, to December 31, 2024).
 
+
 #### Dynamic Tariff
 
-Uses time-varying electricity prices, combining energy and grid charges. Data are available starting in October 2023. Timestamps without available tariff data are excluded from the generated time series.
+Uses time-varying electricity prices, combining energy and grid charges. Although the original dataset only provides complete dynamic tariff data starting in October 2023, missing values are reconstructed using synthetic daily profiles generated from available real tariff data with perturbations.
+
+The reconstruction is performed as follows:
+- Complete daily tariff profiles are selected as reference days, requiring all 96 15-minute intervals to have valid energy and grid tariff values.
+- Missing daily profiles in 2022 and 2023 are reconstructed using reference days from 2023, while missing profiles in 2024 use reference days from 2024.
+- For each missing day, a reference day with the same weekday is randomly selected, preserving the weekly tariff pattern.
+- Synthetic profiles are generated from the selected real profiles: missing energy tariff values (`energy_unit_cn`) are copied directly, while missing grid tariff values (`grid_dyn`) are reconstructed by applying independent random perturbations uniformly distributed between -10% and +10% to each 15-minute interval.
+- Existing tariff values are preserved, and only missing values (`NaN`) are replaced.
+- A fixed random seed is used to ensure reproducibility of the synthetic profiles.
+
+This approach allows the dynamic tariff data to be extended to the entire period (January 1, 2023, to December 31, 2024), providing complete daily profiles while preserving the weekly structure of electricity prices and introducing small variations in the reconstructed grid tariff values.
 
 #### Time-of-use (TOU) Tariff
 
