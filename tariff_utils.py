@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 
 DATA_FILE = "tariff_data.csv"
 CHF_TO_USD = 1.21 
@@ -34,15 +35,67 @@ def standard_tariff(df, df_new, convert_to_usd=True):
 
     return df_new
 
-def dynamic_tariff(df, df_new, convert_to_usd=True):
-    # filters timestamps where dynamic tariff data is available
-    mask = df['energy_unit_cn'].notna() & df['grid_dyn'].notna()
 
-    df = df.loc[mask].copy()
-    df_new = df_new.loc[mask].copy()
+
+def dynamic_tariff(df, df_new, convert_to_usd=True, seed=42):
+    rng = np.random.default_rng(seed)
+
+    data = df[['timestamp_utc', 'energy_unit_cn', 'grid_dyn']].copy()
+    ts = pd.to_datetime(data['timestamp_utc'], utc=True)
+
+    # extracts date, year, weekday and 15-min slot from the timestamp
+    data['_day'] = ts.dt.date
+    data['_year'] = ts.dt.year
+    data['_weekday'] = ts.dt.weekday
+    data['_slot'] = ts.dt.hour * 4 + ts.dt.minute // 15
+
+    # selects complete daily tariff profiles
+    profiles = {}
+    for year in [2023, 2024]:
+        profiles[year] = {}
+        for day, group in data[data['_year'] == year].groupby('_day'):
+            # skips December 31st to avoid transition data
+            if str(day) == '2023-12-31':
+                continue
+            if len(group) == 96 and group[['energy_unit_cn', 'grid_dyn']].notna().all().all():
+                profiles[year].setdefault(group['_weekday'].iloc[0], []).append(
+                    group.set_index('_slot')[['energy_unit_cn', 'grid_dyn']]
+                )
+
+    # fills missing tariff values using random days of the same weekday
+    missing_days = data[data[['energy_unit_cn', 'grid_dyn']].isna().any(axis=1)]['_day'].unique()
+
+    for day in missing_days:
+        group = data[data['_day'] == day]
+        year = group['_year'].iloc[0]
+        weekday = group['_weekday'].iloc[0]
+        # selects the source year for filling missing data
+        source_year = 2023 if year in [2022, 2023] else 2024
+
+        candidates = profiles[source_year].get(weekday, [])
+        if not candidates:
+            print(f'No complete tariff profiles available for filling missing data on {day}. Skipping.')
+            continue
+
+        profile = candidates[rng.integers(len(candidates))]
+        idx = group.index
+        slots = group['_slot']
+
+        for col in ['energy_unit_cn', 'grid_dyn']:
+            missing = data.loc[idx, col].isna()
+            missing_idx = idx[missing]
+
+            values = slots.loc[missing_idx].map(profile[col])
+
+            if col == 'grid_dyn':
+                values *= rng.uniform(0.9, 1.1, len(missing_idx))
+
+            data.loc[missing_idx, col] = values.values
 
     # calculates the dynamic tariff (energy + grid) in CHF/kWh
-    df_new['price_per_kwh'] = (df['energy_unit_cn'] + df['grid_dyn']) / 100
+    df_new['price_per_kwh'] = (
+        data['energy_unit_cn'] + data['grid_dyn']
+    ) / 100
 
     # converts from CHF to USD
     if convert_to_usd:
