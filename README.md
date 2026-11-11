@@ -69,14 +69,14 @@ pip install -r requirements.txt
 Run the main script:
 
 ```bash
-python generate_price_file.py
+python main.py
 ```
 
 The generated CSV files will be saved in the `outputs/prices/` directory. If plot generation is enabled, the daily plots will be saved in the `outputs/plots/` directory.
 
 ## Configuration
 
-The generation process can be configured directly in `generate_price_file.py`.
+The generation process can be configured directly in `main.py`.
 
 ### General configuration
 
@@ -218,7 +218,7 @@ zurich-energy-prices/
 ├── tariff_data.csv          # Original tariff dataset
 ├── tariff_utils.py          # Functions for loading and processing tariff data
 ├── plot_utils.py            # Functions for generating daily price plots
-├── generate_price_file.py   # Main script for generating CSV files and plots
+├── main.py   # Main script for generating CSV files and plots
 │
 ├── requirements.txt         # Python dependencies
 ├── .gitignore
