@@ -231,7 +231,7 @@ zurich-energy-prices/
 - Currency conversion from CHF to USD depends on the exchange rate configured in `tariff_utils.py`.
 - Timestamps are originally provided in UTC. Timezone conversion to `Europe/Zurich` is optional.
 - The export price is calculated as a fixed proportion of the purchase price, according to `EXPORT_PRICE_RATIO`.
-- Missing tariff values are handled according to the tariff structure: TOU values are reconstructed using the corresponding hourly tariff profiles, while unavailable dynamic tariff values are excluded from the generated time series.
+- Missing tariff values are handled according to the tariff structure: TOU values are reconstructed using the corresponding hourly tariff profiles, while synthetic dynamic tariff values are generated from available real tariff data with perturbations. 
 - Plot generation is optional and does not affect CSV generation.
 
 ## Citation
